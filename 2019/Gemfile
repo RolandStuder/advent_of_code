@@ -1,0 +1,7 @@
+source 'https://rubygems.org' do
+  # Gems here
+  gem 'minitest'
+  gem 'artii'
+  gem 'pry'
+  gem 'colorize'
+end
