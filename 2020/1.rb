@@ -26,7 +26,7 @@ class ExpenseReport
     @entries = numbers
   end
 
-  def elements_for_sum(sum= 2020)
+  def elements_for_sum(sum = 2020 )
     @entries.each do |number|
       complement = sum - number
       if @entries.include? complement
@@ -35,9 +35,35 @@ class ExpenseReport
     end
   end
 
+  def three_elements_for_sum(sum = 2020)
+    @entries.each do |number|
+      complement = sum - number
+      if all_sums.include? complement
+        return [number, all_sums[complement]].flatten
+      end
+    end
+  end
+
+  def all_sums
+    return @sums if @sums
+
+    @sums = {}
+    @entries.each_with_index do |a, index|
+       @entries[(index+1)..].each do |b|
+         @sums[(a+b)] = [a,b]
+       end
+    end
+    @sums
+  end
+
   def result
     factor_1, factor_2 = elements_for_sum
     factor_1 * factor_2
+  end
+
+  def result_2
+    factor_1, factor_2, factor_3 = three_elements_for_sum
+    factor_1 * factor_2 * factor_3
   end
 end
 
@@ -46,12 +72,30 @@ class ExpenseReportTest < Minitest::Test
     example_data = [1721, 979, 366, 299, 675, 1456]
     assert_equal 514579, ExpenseReport.new(example_data).result
   end
+
+  def test_all_sums
+    data = [1,2,3]
+    assert_equal ({3=>[1, 2], 4=>[1, 3], 5=>[2, 3]}), ExpenseReport.new(data).all_sums
+  end
+
+  def test_example_two
+    data = [979, 366, 675]
+    assert_equal [979, 366, 675], ExpenseReport.new(data).three_elements_for_sum
+    # assert_equal 241861950, ExpenseReport.new(data).result_2
+  end
 end
 
-
 numbers = File.readlines('1.dat').map(&:to_i)
-puts "RESULT" * 10
+
+puts "1" * 10
 puts
 puts ExpenseReport.new(numbers).result
 puts
-puts "RESULT" * 10
+puts "1" * 10
+puts
+puts "2" * 10
+puts
+puts ExpenseReport.new(numbers).result_2
+puts
+puts "2" * 10
+
