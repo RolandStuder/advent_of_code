@@ -1,2 +1,3 @@
+# Advent of code
 
-* Interesting too see difficulty: http://www.maurits.vdschee.nl/scatterplot/
+This is for fun, don't expect elegance or code quality here. :-)
