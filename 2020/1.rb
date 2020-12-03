@@ -65,6 +65,10 @@ class ExpenseReport
     factor_1, factor_2, factor_3 = three_elements_for_sum
     factor_1 * factor_2 * factor_3
   end
+
+  def easy_solution(summands=2)
+    @entries.combination(summands).find { |elements| elements.sum == 2020}.reduce(&:*)
+  end
 end
 
 class ExpenseReportTest < Minitest::Test
@@ -83,6 +87,7 @@ class ExpenseReportTest < Minitest::Test
     assert_equal [979, 366, 675], ExpenseReport.new(data).three_elements_for_sum
     # assert_equal 241861950, ExpenseReport.new(data).result_2
   end
+
 end
 
 numbers = File.readlines('1.dat').map(&:to_i)
@@ -96,6 +101,7 @@ puts
 puts "2" * 10
 puts
 puts ExpenseReport.new(numbers).result_2
+puts ExpenseReport.new(numbers).easy_solution(3)
 puts
 puts "2" * 10
 
