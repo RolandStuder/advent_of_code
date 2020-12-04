@@ -2,21 +2,6 @@ require 'pry'
 require 'minitest'
 require 'minitest/autorun'
 
-EXAMPLE_INPUT = %{
-ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
-byr:1937 iyr:2017 cid:147 hgt:183cm
-
-iyr:2013 ecl:amb cid:350 eyr:2023 pid:028048884
-hcl:#cfa07d byr:1929
-
-hcl:#ae17e1 iyr:2013
-eyr:2024
-ecl:brn pid:760753108 byr:1931
-hgt:179cm
-
-hcl:#cfa07d eyr:2025 pid:166559648
-iyr:2011 ecl:brn hgt:59in
-}
 
 class Document
   def initialize(hash)
@@ -90,56 +75,75 @@ class Document
       @data[field]
     end
   end
+
+  def self.from_string(string)
+    entries = string.split("\n\n")
+    entries.map! do |entry|
+      entry.split.each_with_object({}) do |pair, obj|
+        k,v = pair.split(":")
+        obj[k] = v
+      end
+    end
+    entries.map { |e| new(e)}
+  end
 end
+
+
+EXAMPLE_INPUT = %{
+ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
+byr:1937 iyr:2017 cid:147 hgt:183cm
+
+iyr:2013 ecl:amb cid:350 eyr:2023 pid:028048884
+hcl:#cfa07d byr:1929
+
+hcl:#ae17e1 iyr:2013
+eyr:2024
+ecl:brn pid:760753108 byr:1931
+hgt:179cm
+
+hcl:#cfa07d eyr:2025 pid:166559648
+iyr:2011 ecl:brn hgt:59in
+}
 
 class DocumentTest < Minitest::Test
   def test_getting_entries
-    entries = EXAMPLE_INPUT.split("\n\n")
-    assert_equal 4, entries.count
-  end
-
-  def test_getting_key_value_pairs_from_entries
-    entries = EXAMPLE_INPUT.split("\n\n")
-    entries.map! do |entry|
-      entry.split.each_with_object({}) do |pair, obj|
-        k,v = pair.split(":")
-        obj[k] = v
-      end
-    end
-    assert_equal "gry", entries.first["ecl"]
+    documents = Document.from_string(EXAMPLE_INPUT)
+    assert_equal 4, documents.count
   end
 
   def test_validity
-    entries = EXAMPLE_INPUT.split("\n\n")
-    entries.map! do |entry|
-      entry.split.each_with_object({}) do |pair, obj|
-        k,v = pair.split(":")
-        obj[k] = v
-      end
-    end
-
-    assert Document.new(entries[0]).valid?
-    assert_equal false, Document.new(entries[1]).valid?
-    assert Document.new(entries[2]).valid?
-    assert_equal false, Document.new(entries[3]).valid?
+    documents = Document.from_string(EXAMPLE_INPUT)
+    assert documents[0].valid?
+    assert_equal false, documents[1].valid?
+    assert documents[2].valid?
+    assert_equal false, documents[3].valid?
   end
 end
 
 
 puts "Solution ONE:"
 
-entries = File.read("4.dat").split("\n\n")
-entries.map! do |entry|
-  entry.split.each_with_object({}) do |pair, obj|
-    k,v = pair.split(":")
-    obj[k] = v
-  end
-end
-documents = entries.map { |e| Document.new(e)}
+documents = Document.from_string(File.read("4.dat"))
 puts documents.count(&:valid?)
 
 
 # part 2
+
+VALID_EXAMPLES = %{
+pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980
+hcl:#623a2f
+
+eyr:2029 ecl:blu cid:129 byr:1989
+iyr:2014 pid:896056539 hcl:#a97842 hgt:165cm
+
+hcl:#888785
+hgt:164cm byr:2001 iyr:2015 cid:88
+pid:545766238 ecl:hzl
+eyr:2022
+
+iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
+}
+
 
 INVALID_EXAMPLES = %{
 eyr:1972 cid:100
@@ -157,60 +161,21 @@ eyr:2038 hcl:74454a iyr:2023
 pid:3556412378 byr:2007
 }
 
-entries = INVALID_EXAMPLES.split("\n\n")
-entries.map! do |entry|
-  entry.split.each_with_object({}) do |pair, obj|
-    k,v = pair.split(":")
-    obj[k] = v
+class DocumentTwoTest < Minitest::Test
+  def test_valid_entries
+    documents = Document.from_string(VALID_EXAMPLES)
+    assert documents.all?(&:valid_fields?)
+  end
+
+  def test_invalid_entries
+    documents = Document.from_string(INVALID_EXAMPLES)
+    assert documents.none?(&:valid_fields?)
   end
 end
-documents = entries.map { |e| Document.new(e)}
 
-puts "none valid?"
-puts documents.none? { |d| d.valid_fields? }
-
-
-VALID_EXAMPLES = %{
-pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980
-hcl:#623a2f
-
-eyr:2029 ecl:blu cid:129 byr:1989
-iyr:2014 pid:896056539 hcl:#a97842 hgt:165cm
-
-hcl:#888785
-hgt:164cm byr:2001 iyr:2015 cid:88
-pid:545766238 ecl:hzl
-eyr:2022
-
-iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
-}
-
-entries = VALID_EXAMPLES.split("\n\n")
-entries.map! do |entry|
-  entry.split.each_with_object({}) do |pair, obj|
-    k,v = pair.split(":")
-    obj[k] = v
-  end
-end
-documents = entries.map { |e| Document.new(e)}
-
-puts "all valid?"
-documents.each do |d|
-  unless d.valid_fields?
-    puts d.validated_fields
-  end
-end
 
 
 puts "Solution TWO:"
 
-entries = File.read("4.dat").split("\n\n")
-entries.map! do |entry|
-  entry.split.each_with_object({}) do |pair, obj|
-    k,v = pair.split(":")
-    obj[k] = v
-  end
-end
-documents = entries.map { |e| Document.new(e)}
+documents = Document.from_string(File.read("4.dat"))
 puts documents.count(&:valid_fields?)
-
