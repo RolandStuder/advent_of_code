@@ -41,3 +41,10 @@ puts "Solution 1"
 
 passes = File.readlines("5.dat").map{ |line| BoardingPass.new(line) }
 puts passes.max_by { |pass| pass.seat_id }.seat_id
+
+puts "Solution 2"
+
+seat_ids = passes.collect(&:seat_id).sort
+seat_ids.each do |id|
+  puts id + 1 if seat_ids.include?(id + 2) && !seat_ids.include?(id + 1)
+end
