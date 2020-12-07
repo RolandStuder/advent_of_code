@@ -143,4 +143,5 @@ puts count
 
 puts "Solution 2"
 
+puts Bag.find("shiny", "gold").should_contain(deep: true).count
 
