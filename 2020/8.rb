@@ -19,7 +19,6 @@ class Program
     loop do
       instruction = @instructions[@pointer]
       raise InfiniteLoopException if @visited.include?(@pointer)
-      puts @pointer, @instructions.size
       return self if @pointer == @instructions.size
       @visited << @pointer
       send(instruction.operation, instruction.value)
@@ -27,14 +26,14 @@ class Program
   end
 
   def parse_instructions
-    @raw_lines.map do |line|
+    @raw_lines.map.with_index do |line, index|
       operation, value = line.split
-      OpenStruct.new({operation: operation.to_sym, value: value.to_i})
+      OpenStruct.new({operation: operation.to_sym, value: value.to_i, line: index})
     end
   end
 
-  def overwrite(line, instruction)
-    @instructions[line] = instruction
+  def overwrite(instruction)
+    @instructions[instruction.line] = instruction
   end
 
   def acc(value)
@@ -80,18 +79,37 @@ acc +6
   end
 end
 
-program = Program.new(File.read("8.dat"))
+raw_program = File.read("8.dat")
+program = Program.new(raw_program)
 
 puts "Solution 1"
 
 begin
   program.run
-rescue
+rescue Program::InfiniteLoopException => exception
+  puts exception.message
   puts program.accumulator
 end
 
-puts "Solution 2"
+candidate_instructions = program.instructions.select do |instruction|
+  [:nop, :jmp].include?(instruction.operation)
+end
 
-# candidate_instructions = program.
+mutatated_programs = candidate_instructions.map do |candidate|
+  p = Program.new(raw_program)
+  candidate.operation = (candidate.operation == :nop ? :jmp : :nop)
+  p.overwrite(candidate)
+  p
+end
 
+mutatated_programs.each do |program|
+  begin
+    program.run
+    puts "Solution 2"
+    puts program.accumulator
+    break
+  rescue Program::InfiniteLoopException => exception
+    puts exception.message
+  end
+end
 
