@@ -18,7 +18,9 @@ class Program
   def run
     loop do
       instruction = @instructions[@pointer]
-      return self if @visited.include?(@pointer)
+      raise InfiniteLoopException if @visited.include?(@pointer)
+      puts @pointer, @instructions.size
+      return self if @pointer == @instructions.size
       @visited << @pointer
       send(instruction.operation, instruction.value)
     end
@@ -29,6 +31,10 @@ class Program
       operation, value = line.split
       OpenStruct.new({operation: operation.to_sym, value: value.to_i})
     end
+  end
+
+  def overwrite(line, instruction)
+    @instructions[line] = instruction
   end
 
   def acc(value)
@@ -42,6 +48,13 @@ class Program
 
   def nop(_value)
     @pointer += 1
+  end
+
+  class InfiniteLoopException < StandardError
+    def initialize(msg="Infinite Loop reached", exception_type="custom")
+      @exception_type = exception_type
+      super(msg)
+    end
   end
 end
 
@@ -60,7 +73,10 @@ acc +6
 
   def test_example
     p = Program.new(TEST_INPUT)
-    assert_equal 5, p.run.accumulator
+    assert_raises Program::InfiniteLoopException do
+      p.run
+    end
+    assert_equal 5, p.accumulator
   end
 end
 
@@ -68,8 +84,14 @@ program = Program.new(File.read("8.dat"))
 
 puts "Solution 1"
 
-puts program.run.accumulator
+begin
+  program.run
+rescue
+  puts program.accumulator
+end
 
 puts "Solution 2"
+
+# candidate_instructions = program.
 
 
