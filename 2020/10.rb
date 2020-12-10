@@ -69,6 +69,52 @@ class JoltAdapter
   end
 end
 
+class JoltTree
+  def self.from_string(input_string)
+    joltages = input_string.split("\n").map(&:to_i)
+    joltages += [0, (joltages.max + 3)]
+    joltages.sort!
+    @max_value = joltages.last
+    @joltages = joltages.map do |value|
+      possible_predecessors = joltages.select {|j| j.between?(value-3, value-1) }
+      Joltage.new(value, possible_predecessors)
+    end
+  end
+
+  def self.clear
+    @max_value = nil
+    @joltages = []
+  end
+
+  def self.find_by_value(value)
+    @joltages.find{ |joltage| joltage.value == value }
+  end
+
+  def self.count_ways
+    @joltages.each do |joltage|
+      sum = joltage.possible_predecessors.map(&:ways_to_get_there).sum
+      joltage.ways_to_get_there = sum > 0 ? sum : 1
+      puts joltage.ways_to_get_there
+    end
+    @joltages.last.ways_to_get_there
+  end
+
+  class Joltage
+    attr_reader :value, :possible_predecessors
+    attr_accessor :ways_to_get_there
+    def initialize(value, possible_predecessors)
+      @value = value
+      @possible_predecessors = possible_predecessors
+      @ways_to_get_there = 1
+    end
+
+    def possible_predecessors
+      return @_possible_predecessors if @_possible_predecessors
+      @_possible_predecessors = @possible_predecessors.map { |j| JoltTree.find_by_value(j) }
+    end
+  end
+end
+
 
 class JoltAdapterTests < Minitest::Test
   TEST_INPUT = %{16
@@ -91,7 +137,9 @@ class JoltAdapterTests < Minitest::Test
     assert_equal 5, dist[3]
     assert_equal 7, dist[1]
 
-    assert_equal 8, JoltAdapter.valid_arrangements.count
+    JoltTree.clear
+    JoltTree.from_string(TEST_INPUT)
+    assert_equal 8, JoltTree.count_ways
   end
 end
 
@@ -102,4 +150,6 @@ diff = JoltAdapter.difference_distribution
 puts diff[3] * diff[1]
 
 puts "Solution 2"
-JoltAdapter.valid_arrangements.count
+JoltTree.clear
+JoltTree.from_string(File.read("10.dat"))
+puts JoltTree.count_ways
