@@ -188,10 +188,10 @@ describe Ferry do
     ferry = list.run(from: 0, to: 2, with: WayPointFerry)
     assert_equal 170, ferry.x
     assert_equal 38, ferry.y
+    puts "Solution 1"
   end
 end
 
-puts "Solution 1"
 list = CommandList.new_from_string(File.read("12.dat"))
 ferry = list.run
 puts ferry.x.abs + ferry.y.abs
