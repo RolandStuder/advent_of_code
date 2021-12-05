@@ -10,8 +10,8 @@ class VentMap
     @grid =  Array.new(height, 0).map { |row| Array.new(width, 0)}
   end
 
-  def draw_line(from, to)
-    from.coordinates_connecting(to).each do |coord|
+  def draw_line(from, to, diagonals: false)
+    from.coordinates_connecting(to, diagonals: diagonals).each do |coord|
       @grid[coord.y][coord.x] += 1
     end
   end
@@ -52,6 +52,8 @@ class Day5 < Minitest::Test
     parsed.coordinate_pairs.each do |coord_1, coord_2|
       map.draw_line(coord_1, coord_2)
     end
+
+    puts map.to_s
     assert_equal 2, map.grid[9][2]
     assert_equal 5, map.dangerous_points_count
   end
@@ -74,6 +76,14 @@ map = VentMap.new(1000, 1000)
 
 parsed_input.coordinate_pairs.each do |coord_1, coord_2|
   map.draw_line(coord_1, coord_2)
+end
+
+pp map.dangerous_points_count
+
+map = VentMap.new(1000, 1000)
+
+parsed_input.coordinate_pairs.each do |coord_1, coord_2|
+  map.draw_line(coord_1, coord_2, diagonals: true)
 end
 
 pp map.dangerous_points_count
