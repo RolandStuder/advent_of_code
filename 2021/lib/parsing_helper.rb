@@ -13,4 +13,9 @@ class ParsingHelper
   def lines
     @raw.split("\n")
   end
+
+  def integers
+    lines.first.split(",").map(&:to_i)
+  end
+
 end
