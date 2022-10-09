@@ -11,7 +11,6 @@ class DecoractionDisplay
 
   def initialize
     @grid = Grid.with_size(1000, 1000, default_value: -> { Light.new })
-    binding.irb
   end
 
   def perform
