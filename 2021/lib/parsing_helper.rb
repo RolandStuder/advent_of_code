@@ -14,8 +14,11 @@ class ParsingHelper
     @raw.split("\n")
   end
 
+  def integer_lines
+    lines.map { |map| map.chars.map(&:to_i)}
+  end
+
   def integers
     lines.first.split(",").map(&:to_i)
   end
-
 end

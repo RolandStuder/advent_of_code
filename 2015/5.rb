@@ -25,19 +25,27 @@ module VeryNaughtyString
     end
 
     def nice?
-      has_double_chars_repetition? && has_mirror_chars?
+      has_double_chars_repetition? && has_repeating_letter_with_one_in_between?
     end
 
     def has_double_chars_repetition?
-      has_it = false
-      chars.each.with_index { |char, index| (has_it = true; break) if self[(index + 2)..].include? (char + self[index+1].to_s) }
-      has_it
+      (0..(size-3)).each do |index|
+        if self[(index + 2)..].include?(self[index, 2])
+          return true
+        end
+      end
+
+      false
     end
 
-    def has_mirror_chars?
-      mirror_chars = false
-      chars.each.with_index { |char, index| (mirror_chars = true) if (char != self[index+1] && char == self[index+2].to_s) }
-      mirror_chars
+    def has_repeating_letter_with_one_in_between?
+      (0..(size-2)).each do |index|
+        if self[index] == self[index+2]
+          return true
+        end
+      end
+
+      false
     end
   end
 end
@@ -47,11 +55,18 @@ class Day5Test < Minitest::Test
   using VeryNaughtyString
 
   def test_example_input
-    assert "aaxaa".has_mirror_chars?
+    # assert "aaxaa".has_mirror_chars?
     assert "xyxy".has_double_chars_repetition?
+    assert "xyahsdfljxy".has_double_chars_repetition?
     assert "aaxaa".nice?
+
+    assert "qjhvhtzxzqqjkmpb".nice?
+    assert "xxyxx".nice?
+    assert !"uurcxstgmygtbstg".nice?
+    assert !"ieodomkazucvgmuy".nice?
   end
 end
 
-using VeryNaughtyString 
+# using NaughtyString
+using VeryNaughtyString
 pp ParsingHelper.load(2015,5).lines.count(&:nice?)
