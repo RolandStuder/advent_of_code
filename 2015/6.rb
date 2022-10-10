@@ -3,14 +3,11 @@ require "minitest/autorun"
 require_relative '../lib/grid'
 require "./lib/parsing_helper"
 
-pp Grid.with_size(2, 2)
-
-
 class DecoractionDisplay
   attr_reader :grid
 
-  def initialize
-    @grid = Grid.with_size(1000, 1000, default_value: -> { Light.new })
+  def initialize(light_class = Light)
+    @grid = Grid.with_size(1000, 1000, default_value: -> { light_class.new })
   end
 
   def perform
@@ -58,15 +55,43 @@ class Light
   end
 end
 
-class Day6Test < Minitest::Test
-  def test_example_input
+class DimmableLight
+  attr_reader :brightness
 
+  def initialize
+    @brightness = 0
+  end
+
+  def toggle
+    @brightness += 2
+  end
+
+  def turn_on
+    @brightness += 1
+  end
+
+  def turn_off
+    @brightness -= 1 unless @brightness.zero?
   end
 end
 
+class Day6Test < Minitest::Test
+  def test_part_1
+    display = DecoractionDisplay.new
+    display.perform
+    assert_equal 569999, display.grid.slice(Coordinate.new(0,0), Coordinate.new(999,999)).count(&:on?)
+  end
+end
 
-
+puts "Warning: Be patient, my solution is quite slow"
+# Part 1
 
 display = DecoractionDisplay.new
 display.perform
 puts display.grid.slice(Coordinate.new(0,0), Coordinate.new(999,999)).count(&:on?)
+
+# Part 2
+
+display = DecoractionDisplay.new(DimmableLight)
+display.perform
+puts display.grid.slice(Coordinate.new(0,0), Coordinate.new(999,999)).sum(&:brightness)
