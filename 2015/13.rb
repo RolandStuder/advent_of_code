@@ -40,7 +40,7 @@ class Person
   attr :name, :modifiers
   def initialize(name)
     @name = name
-    @modifiers = {}
+    @modifiers = Hash.new(0)
   end
 
   def add_modifier(other_name, change)
@@ -83,4 +83,5 @@ puts congregation.max_happiness_delta
 
 puts "PART: 2"
 
-
+congregation.add_person(Person.new("Myself"))
+puts congregation.max_happiness_delta
