@@ -2,18 +2,19 @@ require "minitest/autorun"
 require "./lib/parsing_helper"
 
 class Reindeer
-  attr_reader :name, :speed, :flying_time, :flying_time_left, :resting_time, :resting_time_left, :distance_travelled, :time_passed, :state
+  attr_reader :name, :speed, :flying_time, :flying_time_left, :resting_time, :resting_time_left, :distance_travelled, :time_passed, :state, :score
 
   def initialize(name:, speed:, flying_time:, resting_time:, distance_travelled: 0, time_passed: 0)
     @name = name
-    @speed = speed
-    @flying_time = flying_time
-    @resting_time = resting_time
+    @speed = speed.to_i
+    @flying_time = flying_time.to_i
+    @resting_time = resting_time.to_i
     @distance_travelled = distance_travelled
     @time_passed = 0
     @state = :flying
-    @flying_time_left = flying_time
-    @resting_time_left = resting_time
+    @flying_time_left = @flying_time
+    @resting_time_left = @resting_time
+    @score = 0
   end
 
   def travel(seconds)
@@ -51,6 +52,10 @@ class Reindeer
     end
     self
   end
+
+  def add_point
+    @score += 1
+  end
 end
 
 class Day14Test < Minitest::Test
@@ -64,7 +69,28 @@ class Day14Test < Minitest::Test
 end
 
 
+reindeers = ParsingHelper.load(2015, 14).lines.map do |line|
+  matches = line.match(/(.*) can fly (.*) km\/s for (.*) seconds, but then must rest for (.*) seconds/)
+  Reindeer.new(name: matches[1], speed: matches[2], flying_time: matches[3], resting_time: matches[4])
+end
+
+
 puts "PART: 1"
+puts reindeers.map{ |reindeer| reindeer.travel(2503).distance_travelled }.max
+
 
 puts "PART: 2"
+
+reindeers = ParsingHelper.load(2015, 14).lines.map do |line|
+  matches = line.match(/(.*) can fly (.*) km\/s for (.*) seconds, but then must rest for (.*) seconds/)
+  Reindeer.new(name: matches[1], speed: matches[2], flying_time: matches[3], resting_time: matches[4])
+end
+
+2503.times do
+  reindeers.map{ |reindeer| reindeer.travel(1).distance_travelled }
+  current_lead = reindeers.map(&:distance_travelled).max
+  reindeers.select { |reindeer| current_lead == reindeer.distance_travelled }.each(&:add_point)
+end
+
+puts reindeers.map(&:score).max
 
