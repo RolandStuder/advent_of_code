@@ -12,6 +12,12 @@ class RockPaperScissorsRound
     "Z" => :scissors
   }
 
+  BEATS = {
+    rock: :scissors,
+    paper: :rock,
+    scissors: :paper
+  }
+
   def self.from_string(string)
     first, second = string.split
     new(MAPPINGS[first], MAPPINGS[second])
@@ -23,17 +29,9 @@ class RockPaperScissorsRound
     if second == "Y" # draw
       me = opponent
     elsif second == "X" # loose
-      me = {
-        rock: :scissors,
-        paper: :rock,
-        scissors: :paper
-      }[opponent]
+      me = BEATS[opponent]
     else
-      me = {
-        rock: :scissors,
-        paper: :rock,
-        scissors: :paper
-      }.invert[opponent]
+      me = BEATS.invert[opponent]
     end
 
     new(opponent, me)
@@ -59,11 +57,7 @@ class RockPaperScissorsRound
   def fight_score
     if @opponent == @me
       3
-    elsif @opponent == :rock && @me == :scissors
-      0
-    elsif @opponent == :paper && @me == :rock
-      0
-    elsif @opponent == :scissors && @me == :paper
+    elsif BEATS[opponent] == me
       0
     else
       6
