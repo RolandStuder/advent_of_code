@@ -26,7 +26,16 @@ def sum_of_distances(list_one, list_two)
   distances.sum
 end
 
+def total_similarity_score(list_one, list_two)
+  tally = list_two.tally
+  list_one.map do |number|
+    number * (tally[number] || 0)
+  end.sum
+end
 example_list_one, example_list_two = sorted_lists(example)
 list_one, list_two = sorted_lists(ParsingHelper.load(2024, 1).raw)
 puts sum_of_distances(example_list_one, example_list_two)
 puts sum_of_distances(list_one, list_two)
+
+puts total_similarity_score(example_list_one, example_list_two)
+puts total_similarity_score(list_one, list_two)
