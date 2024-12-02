@@ -39,6 +39,11 @@ class ReportSequence
     deltas.all? { |delta| delta.abs <= max_delta }
   end
 
+  def dampen
+    extend(ProblemDampener)
+    self
+  end
+
   private
 
   def deltas
@@ -55,7 +60,7 @@ module ProblemDampener
 
   def report_sequence_variations_missing_one_report
     each_index.map do |i|
-      ReportSequence.new(self[0...i] + self[(i + 1)..-1])
+      ReportSequence.new(self.reject.with_index { |_, idx| idx == i })
     end
   end
 end
@@ -81,16 +86,16 @@ class ReportSequenceTest < Minitest::Test
   end
 
   def test_safe_with_problem_dampener
-    assert ReportSequence.new([7, 6, 4, 2, 1]).extend(ProblemDampener).safe?
-    refute ReportSequence.new([1, 2, 7, 8, 9]).extend(ProblemDampener).safe?
-    refute ReportSequence.new([9, 7, 6, 2, 1]).extend(ProblemDampener).safe?
-    assert ReportSequence.new([1, 3, 2, 4, 5]).extend(ProblemDampener).safe?
-    assert ReportSequence.new([8, 6, 4, 4, 1]).extend(ProblemDampener).safe?
-    assert ReportSequence.new([1, 3, 6, 7, 9]).extend(ProblemDampener).safe?
+    assert ReportSequence.new([7, 6, 4, 2, 1]).dampen.safe?
+    refute ReportSequence.new([1, 2, 7, 8, 9]).dampen.safe?
+    refute ReportSequence.new([9, 7, 6, 2, 1]).dampen.safe?
+    assert ReportSequence.new([1, 3, 2, 4, 5]).dampen.safe?
+    assert ReportSequence.new([8, 6, 4, 4, 1]).dampen.safe?
+    assert ReportSequence.new([1, 3, 6, 7, 9]).dampen.safe?
   end
 end
 
 
 puts input.map { |sequence| ReportSequence.new(sequence) }.count(&:safe?)
-puts input.map { |sequence| ReportSequence.new(sequence).extend(ProblemDampener) }.count(&:safe?)
+puts input.map { |sequence| ReportSequence.new(sequence).dampen }.count(&:safe?)
 
