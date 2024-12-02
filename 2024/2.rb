@@ -18,7 +18,7 @@ class ReportSequence
   include Enumerable
   extend Forwardable
 
-  def_delegators :@sequence, :each, :size
+  def_delegators :@sequence, :each, :size, :each_index, :[]
 
   def initialize(sequence)
     @sequence = sequence
@@ -46,6 +46,21 @@ class ReportSequence
   end
 end
 
+module ProblemDampener
+  def safe?
+    ReportSequence.new(self).safe? || (report_sequence_variations_missing_one_report).any?(&:safe?)
+  end
+
+  private
+
+  def report_sequence_variations_missing_one_report
+    each_index.map do |i|
+      ReportSequence.new(self[0...i] + self[(i + 1)..-1])
+    end
+  end
+end
+
+
 class ReportSequenceTest < Minitest::Test
   def test_monotonic
     assert ReportSequence.new([7, 6, 4, 2, 1]).monotonic?
@@ -64,6 +79,18 @@ class ReportSequenceTest < Minitest::Test
     refute ReportSequence.new([8, 6, 4, 4, 1]).safe?
     assert ReportSequence.new([1, 3, 6, 7, 9]).safe?
   end
+
+  def test_safe_with_problem_dampener
+    assert ReportSequence.new([7, 6, 4, 2, 1]).extend(ProblemDampener).safe?
+    refute ReportSequence.new([1, 2, 7, 8, 9]).extend(ProblemDampener).safe?
+    refute ReportSequence.new([9, 7, 6, 2, 1]).extend(ProblemDampener).safe?
+    assert ReportSequence.new([1, 3, 2, 4, 5]).extend(ProblemDampener).safe?
+    assert ReportSequence.new([8, 6, 4, 4, 1]).extend(ProblemDampener).safe?
+    assert ReportSequence.new([1, 3, 6, 7, 9]).extend(ProblemDampener).safe?
+  end
 end
 
+
 puts input.map { |sequence| ReportSequence.new(sequence) }.count(&:safe?)
+puts input.map { |sequence| ReportSequence.new(sequence).extend(ProblemDampener) }.count(&:safe?)
+
