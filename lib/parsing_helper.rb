@@ -15,6 +15,6 @@ class ParsingHelper
   end
 
   def integers
-    lines.first.split(",").map(&:to_i)
+    lines.map { |line| line.split(/\D+/).map(&:to_i) }
   end
 end
